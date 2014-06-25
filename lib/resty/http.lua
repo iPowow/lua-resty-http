@@ -46,7 +46,7 @@ end
 local function adjustheaders(reqt)
     -- default headers
     local lower = {
-        ["user-agent"] = USERAGENT,
+        ["user-agent"] = ngx.var.http_user_agent, --USERAGENT, -- TPAZ. we want a proxy behavior in our case...
         ["host"] = reqt.host,
         ["connection"] = "close, TE",
         ["te"] = "trailers"
@@ -293,7 +293,6 @@ function request(self, reqt)
     end
     
     h = h .. '\r\n' -- close headers
-    
     bytes, err = sock:send(reqline .. h)
     if err then
         sock:close()
@@ -359,7 +358,17 @@ function request(self, reqt)
         nreqt.header_callback(headers)
     end
 
-    -- TODO rediret check
+    -- TPAZ: rediret check
+    if shouldredirect(reqt, code, headers) then
+        reqt.url  = headers.location
+        reqt.host = url.parse(reqt.url).authority  -- any better solution other than using url.parse twice is welcome...
+        return request(self, reqt)
+    else
+        if code ~= 200 then
+            sock:close()
+            return nil, "could not follow redirect. status code: " .. code
+        end
+    end
 
     -- receive body
     if shouldreceivebody(nreqt, code) then
