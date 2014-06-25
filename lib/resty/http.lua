@@ -376,7 +376,7 @@ function request(self, reqt)
         if err then
             sock:close()
             if code == 200 then
-                return 1, code, headers, status, nil
+                return 1, code, headers, status, nil, nreqt
             end
             return nil, "read body failed " .. err
         end
@@ -388,7 +388,7 @@ function request(self, reqt)
         sock:close()
     end
 
-    return 1, code, headers, status, body
+    return 1, code, headers, status, body, nreqt
 end
 
 function proxy_pass(self, reqt)
