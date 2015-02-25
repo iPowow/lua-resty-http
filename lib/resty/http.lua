@@ -231,7 +231,7 @@ local function shouldredirect(reqt, code, headers)
     return headers.location and
            string.gsub(headers.location, "%s", "") ~= "" and
            (reqt.redirect ~= false) and
-           (code == 301 or code == 302) and
+           (code == 301 or code == 302 or 307) and
            (not reqt.method or reqt.method == "GET" or reqt.method == "HEAD")
            and (not reqt.nredirects or reqt.nredirects < 5)
 end
